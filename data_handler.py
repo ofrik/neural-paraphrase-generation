@@ -6,7 +6,7 @@ class Data:
         # create vocab and reverse vocab maps
         self.vocab     = {}
         self.rev_vocab = {}
-        self.END_TOKEN = 1 
+        self.END_TOKEN = 1
         self.UNK_TOKEN = 2
         with open(FLAGS.vocab_filename) as f:
             for idx, line in enumerate(f):
@@ -32,14 +32,14 @@ class Data:
                     for source,target in zip(finput, foutput):
                         yield {
                             'input': self.tokenize_and_map(source)[:self.FLAGS.input_max_length - 1] + [self.END_TOKEN],
-                            'output': self.tokenize_and_map(target)[:self.FLAGS.output_max_length - 1] + [self.END_TOKEN]}
+                            'output': [self.END_TOKEN]}
 
         data_feed = sampler()
         def feed_fn():
             source, target = [], []
             input_length, output_length = 0, 0
             for i in range(self.FLAGS.batch_size):
-                rec = data_feed.next()
+                rec = next(data_feed)
                 source.append(rec['input'])
                 target.append(rec['output'])
                 input_length = max(input_length, len(source[-1]))
