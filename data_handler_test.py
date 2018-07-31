@@ -28,14 +28,11 @@ class Data:
 
         def sampler():
             while True:
-                for input_filename,output_filename in zip(self.FLAGS.input_filename.split(","),self.FLAGS.output_filename.split(",")):
-                    with open(input_filename) as finput, open(output_filename) as foutput:
-                        for source, target in zip(finput, foutput):
-                            yield {
-                                'input': self.tokenize_and_map(source)[:self.FLAGS.input_max_length - 1] + [
-                                    self.END_TOKEN],
-                                'output': self.tokenize_and_map(target)[:self.FLAGS.output_max_length - 1] + [
-                                    self.END_TOKEN]}
+                with open(self.FLAGS.input_filename) as finput:
+                    for source in finput:
+                        yield {
+                            'input': self.tokenize_and_map(source)[:self.FLAGS.input_max_length - 1] + [self.END_TOKEN],
+                            'output': [self.END_TOKEN]}
 
         data_feed = sampler()
 

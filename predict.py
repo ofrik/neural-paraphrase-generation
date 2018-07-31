@@ -4,7 +4,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import logging
 import tensorflow as tf
 from seq2seq import Seq2seq
-from data_handler import Data
+from data_handler_test import Data
 
 FLAGS = tf.flags.FLAGS
 
@@ -26,9 +26,8 @@ tf.flags.DEFINE_integer('output_max_length', 30, 'Max length of output sequence 
 tf.flags.DEFINE_bool('use_residual_lstm', True, 'To use the residual connection with the residual LSTM')
 
 # Data related
-tf.flags.DEFINE_string('input_filename', 'data/mscoco/train_source.txt', 'Name of the train source file')
-tf.flags.DEFINE_string('output_filename', 'data/mscoco/train_target.txt', 'Name of the train target file')
-tf.flags.DEFINE_string('vocab_filename', 'data/mscoco/train_vocab.txt', 'Name of the vocab file')
+tf.flags.DEFINE_string('input_filename', 'data/test_source.txt', 'Name of the train source file')
+tf.flags.DEFINE_string('vocab_filename', 'data/train_vocab.txt', 'Name of the vocab file')
 
 
 def main(args):
@@ -38,8 +37,8 @@ def main(args):
     model = Seq2seq(data.vocab_size, FLAGS)
 
     input_fn, feed_fn = data.make_input_fn()
-    print_inputs = tf.train.LoggingTensorHook(['source', 'target', 'predict'], every_n_iter=FLAGS.print_every,
-                                              formatter=data.get_formatter(['source', 'target', 'predict']))
+    print_inputs = tf.train.LoggingTensorHook(['source', 'predict'], every_n_iter=1,
+                                              formatter=data.get_formatter(['source', 'predict']))
 
     estimator = tf.estimator.Estimator(model_fn=model.make_graph, model_dir=FLAGS.model_dir, params=FLAGS)
 
@@ -48,9 +47,10 @@ def main(args):
         return f.read().splitlines()
 
     vocab = get_vocabulary(FLAGS.vocab_filename)
-    rslt = estimator.predict(input_fn=input_fn, hooks=[tf.train.FeedFnHook(feed_fn)])
+    rslt = estimator.predict(input_fn=input_fn, hooks=[tf.train.FeedFnHook(feed_fn), print_inputs])
     for k in rslt:
-        print(" ".join([vocab[i] for i in k if vocab[i] not in ["<S>","</S>"]]))
+        pass
+        # print(" ".join([vocab[i] for i in k if vocab[i] not in ["<S>","</S>"]]))
 
 
 if __name__ == "__main__":
